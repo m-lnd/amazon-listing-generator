@@ -1,6 +1,27 @@
+"use client";
+import { useState } from "react";
 import Image from "next/image";
 
 export default function Home() {
+  const [url, setUrl] = useState("");
+  const [marketplace, setMarketplace] = useState("UAE");
+  const [brand, setBrand] = useState("");
+  const [message, setMessage] = useState("");
+  const handleGenerate = async () => {
+    const response = await fetch("/api/scrape", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url,
+      }),
+    });
+
+    const data = await response.json();
+
+    setMessage(data.markdown);
+  };
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100 text-gray-900">
       <div className="w-full max-w-xl rounded-lg bg-white p-8 shadow">
@@ -17,6 +38,8 @@ export default function Home() {
           <input
             type="text"
             placeholder="https://..."
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
             className="w-full rounded border p-2"
           />
         </div>
@@ -26,9 +49,13 @@ export default function Home() {
             Marketplace
           </label>
 
-          <select className="w-full rounded border p-2">
-            <option>UAE</option>
-            <option>JP</option>
+          <select
+            value={marketplace}
+            onChange={(e) => setMarketplace(e.target.value)}
+            className="w-full rounded border p-2"
+          >
+            <option value="UAE">UAE</option>
+            <option value="JP">JP</option>
           </select>
         </div>
 
@@ -39,14 +66,25 @@ export default function Home() {
 
           <input
             type="text"
+            value={brand}
+            onChange={(e) => setBrand(e.target.value)}
             className="w-full rounded border p-2"
           />
         </div>
 
-        <button className="w-full rounded bg-blue-600 py-3 text-white">
+        <button
+          onClick={handleGenerate}
+          className="w-full rounded bg-blue-600 py-3 text-white hover:bg-blue-700"
+        >
           Generate
         </button>
 
+        {message && (
+          <div className="mt-6 rounded bg-gray-100 p-4">
+            <h2 className="font-semibold">Response</h2>
+            <p>{message}</p>
+          </div>
+        )}
       </div>
     </main>
   );
